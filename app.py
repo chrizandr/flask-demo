@@ -52,6 +52,19 @@ def register():
         return redirect(url_for('login'))
 
 
+@app.route('/forgot', methods=["GET", "POST"])
+def forgot():
+    """Register."""
+    if request.method == "GET":
+        return render_template('forgot.html')
+
+    if request.method == "POST":
+        email = request.form['email']
+
+        # Code here to manage password
+        return redirect(url_for('login'))
+
+
 @app.route('/login', methods=["GET", "POST"])
 def login():
     """Login."""
