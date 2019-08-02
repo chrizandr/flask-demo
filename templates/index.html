@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+
+{% block css %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+{% endblock %}
+
+{% block header %}
+  <h1>{% block title %}Index{% endblock %}</h1>
+{% endblock %}
+
+{% block content %}
+    <article class="post">
+      <header>
+        <div>
+          <h1> User with ID {{user}} is logged in. </h1>
+        </div>
+      </header>
+    </article>
+{% endblock %}

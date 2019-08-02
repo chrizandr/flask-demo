@@ -1,0 +1,26 @@
+<!doctype html>
+<title>{% block title %}{% endblock %} - Demo</title>
+
+{% block css %}{% endblock %}
+
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+<nav>
+  <h1><a href="#">Demo app</a></h1>
+  <ul>
+    {% if user %}
+      <li><a href="{{ url_for('logout', token=token) }}">Log Out</a>
+    {% endif %}
+  </ul>
+</nav>
+<br>
+<section class="content">
+  <header>
+    {% block header %}{% endblock %}
+  </header>
+
+  {% for message in get_flashed_messages() %}
+    <div class="flash">{{ message }}</div>
+  {% endfor %}
+  {% block content %}{% endblock %}
+</section>
+<br>
