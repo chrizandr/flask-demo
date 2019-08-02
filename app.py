@@ -1,6 +1,7 @@
 """Main application."""
 import datetime
 import jwt
+import pdb
 
 from flask import Flask
 from flask import (
@@ -22,18 +23,19 @@ mongo = PyMongo(app)
 def index():
     """Index page."""
     auth_token = request.args.get('token', None)
-
     if auth_token is None:
         flash("Please log in to continue")
         return redirect(url_for('login'))
 
+    # Assume black box
     authenticated, response = decode_auth_token(auth_token)
+
     if not authenticated:
         flash(response)
         return redirect(url_for('login'))
 
     user_id = response
-    return render_template("index.html", user=user_id, token=auth_token)
+    return render_template("index.html", user=user_id, auth_token=auth_token)
 
 
 @app.route('/register', methods=["GET", "POST"])
@@ -45,9 +47,11 @@ def register():
     if request.method == "POST":
         username = request.form['username']
         password = request.form['password']
-        email = request.form['email']
+        email = request.form['emailid']
 
-        mongo.db.users.insert({"username": username, "password": bcrypt.encrypt(password), "email": email})
+        mongo.db.users.insert({"username": username, "password": bcrypt.encrypt(password),
+                              "email": email})
+
         flash("Successfully registered, please login")
         return redirect(url_for('login'))
 
@@ -74,7 +78,10 @@ def login():
     if request.method == "POST":
         username = request.form['username']
         password = request.form['password']
-        remember = request.form.get("remember", "False") == "True"
+        remember = request.form.get("remember", "not_clicked")
+
+        is_remember = remember == "clicked"
+
         error = None
         user = mongo.db.users.find_one({"username": username})
 
@@ -83,13 +90,17 @@ def login():
         else:
             if not bcrypt.verify(password, user["password"]):
                 error = 'Incorrect password.'
+            # pass_hash = bcrypt.encrypt(password)
+            # if not pass_hash == user["password"]:
+            #     error = 'Incorrect password.'
 
         if error is None:
-            auth_token = encode_auth_token(str(user["_id"]), remember)
+            auth_token = encode_auth_token(str(user["_id"]), is_remember)
             return redirect(url_for('index', token=auth_token))
-
-        flash(error)
-        return redirect(url_for('login'))
+            # /?token=sdajndjnodnqoidaismdoaisdo
+        else:
+            flash(error)
+            return redirect(url_for('login'))
 
 
 @app.route('/logout', methods=["GET"])
