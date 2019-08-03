@@ -117,48 +117,50 @@ def logout():
         flash(response)
         return redirect(url_for('login'))
 
-    mongo.db.expired_tokens.insert({"token": auth_token})
+    mongo.db.token_trash.insert({"token": auth_token})
     flash("Successfully logged out")
     return redirect(url_for('login'))
 
 
 def decode_auth_token(auth_token):
     """Decode the auth token."""
-    blacklisted = mongo.db.expired_tokens.find_one({"token": auth_token})
+    blacklisted = mongo.db.token_trash.find_one({"token": auth_token})
 
+    # If there is an expired token, then blacklisted variable will have dictionary instead of None
     if blacklisted is not None:
         return False, 'Session was logged out. Please log in again.'
 
-    try:
-        payload = jwt.decode(auth_token, app.config.get('SECRET_KEY'))
-        return True, payload['sub']
-    except jwt.ExpiredSignatureError:
-        return False, 'Session expired. Please log in again.'
-    except jwt.InvalidTokenError:
-        return False, 'Invalid token. Please log in again.'
+    else:
+        try:
+            payload = jwt.decode(auth_token, app.config.get('SECRET_KEY'))
+            return True, payload['sub']
+        except jwt.ExpiredSignatureError:
+            return False, 'Session expired. Please log in again.'
+        except jwt.InvalidTokenError:
+            return False, 'Invalid token. Please log in again.'
 
 
-def encode_auth_token(user_id, remember=False):
+def encode_auth_token(user_id, remember):
     """Generate the Auth Token."""
-    try:
-        if remember:
-            payload = {
-                'iat': datetime.datetime.utcnow(),
-                'sub': user_id
-            }
-        else:
-            payload = {
-                'exp': datetime.datetime.utcnow() + datetime.timedelta(days=0, seconds=5),
-                'iat': datetime.datetime.utcnow(),
-                'sub': user_id
-            }
-        return jwt.encode(
-            payload,
-            app.config.get('SECRET_KEY'),
-            algorithm='HS256'
-        )
-    except Exception as e:
-        return e
+    # try:
+    if remember is True:
+        payload = {
+            # This tells the time the token was created
+            'iat': datetime.datetime.utcnow(),
+            # This gives the user id of the user that created token
+            'sub': user_id
+        }
+    else:
+        payload = {
+            # This tells the time the token will expire
+            'iat': datetime.datetime.utcnow(),
+            'exp': datetime.datetime.utcnow() + datetime.timedelta(days=0, seconds=5),
+            'sub': user_id
+        }
+    return jwt.encode(payload, app.config.get('SECRET_KEY'),
+                      algorithm='HS256')
+    # except Exception as e:
+    #     return e
 
 
 if __name__ == "__main__":
