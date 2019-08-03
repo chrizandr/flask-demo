@@ -40,7 +40,7 @@ def index():
         response.status_code = status_code
         return response
     else:
-        message = {"message": "Successfully logged in."}
+        message = {"message": "This is index page."}
         response = jsonify(message)
         response.status_code = status_code
         return response
