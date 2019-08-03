@@ -13,9 +13,10 @@ from passlib.hash import bcrypt
 
 
 app = Flask(__name__)
-print("Configuring app...")
+# This is the password to encode/decode the token
 app.secret_key = "DFDKFNWEFOWEFIWV"
 app.config["MONGO_URI"] = "mongodb://localhost:27017/demodb"
+# The connection to the MongoDB server, this is common for multiple threads of the app
 mongo = PyMongo(app)
 
 
@@ -32,13 +33,14 @@ def index():
         auth_token = auth_header.split(" ")[1]
 
     # Assume black box
-    status_code, response = decode_auth_token(auth_token)
+    status_code, response_text = decode_auth_token(auth_token)
 
     if status_code != 200:
-        message = {"message": response}
+        message = {"message": response_text}
         response = jsonify(message)
         response.status_code = status_code
         return response
+    # This block execute when status code is 200
     else:
         message = {"message": "This is index page."}
         response = jsonify(message)
@@ -50,8 +52,10 @@ def index():
 def register():
     """Register."""
     if request.method == "GET":
-        message = {"message": "Please post with the following fields: username, password, emailid"}
+        message = {"message": "Please POST with the following fields: username, password, emailid"}
         response = jsonify(message)
+
+        # This is to modify the status code of the HTTP Response
         response.status_code = 200
         return response
 
@@ -63,16 +67,18 @@ def register():
         if username is None or password is None or email is None:
             message = {"message": "Please post with the following fields: username, password, emailid"}
             response = jsonify(message)
+            # Bad request status code
             response.status_code = 400
             return response
 
-        mongo.db.users.insert({"username": username, "password": bcrypt.encrypt(password),
-                              "email": email})
-
-        message = {"message": "Successfully registered, please login at /login"}
-        response = jsonify(message)
-        response.status_code = 200
-        return response
+        else:
+            # Generate the hash of the password and insert into database
+            mongo.db.users.insert({"username": username, "password": bcrypt.encrypt(password),
+                                  "email": email})
+            message = {"message": "Successfully registered, please login at /login"}
+            response = jsonify(message)
+            response.status_code = 200
+            return response
 
 
 @app.route('/forgot', methods=["GET", "POST"])
@@ -117,6 +123,7 @@ def login():
             message = {"message": "Please post with the following fields: username, password, remember[true/false]"}
             status_code = 400
         else:
+            # It gives the user entry if user exist otherwise None
             user = mongo.db.users.find_one({"username": username})
             if user is None:
                 message = {"message": "username does not exist"}
@@ -131,11 +138,13 @@ def login():
 
             if status_code == 200:
                 auth_token = encode_auth_token(str(user["_id"]), remember == "true")
+                # decode will convert ASCII token to unicode.
                 message = {"auth_token": auth_token.decode("utf-8")}
 
-            response = jsonify(message)
-            response.status_code = status_code
-            return response
+        # This common response for any message
+        response = jsonify(message)
+        response.status_code = status_code
+        return response
 
 
 @app.route('/logout', methods=["GET"])
@@ -198,7 +207,7 @@ def encode_auth_token(user_id, remember):
         payload = {
             # This tells the time the token will expire
             'iat': datetime.datetime.utcnow(),
-            'exp': datetime.datetime.utcnow() + datetime.timedelta(days=0, seconds=5),
+            'exp': datetime.datetime.utcnow() + datetime.timedelta(days=0, seconds=30),
             'sub': user_id
         }
     return jwt.encode(payload, app.config.get('SECRET_KEY'),

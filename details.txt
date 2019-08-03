@@ -1,0 +1,51 @@
+API :
+URL/URIs of the API
+
+- localhost:8080/
+  Test page. This page we can access only after logging in.
+  Valid token -> HTTP Header
+
+- localhost:8080/login
+  Used to log in and get an authentication token
+  params: username, password, remember[true/false]
+  No token is needed
+
+- localhost:8080/register
+  Used to register a user in the API.
+  params: username, password, emailid
+  No token is needed
+
+- localhost:8080/logout
+  Used to make a token as invalid(puts in trash).
+  Valid token is needed
+
+- localhost:8080/forgot
+  To reset password if you forget
+  # There is no functionality in forget
+
+
+# encode_auth_token , decode_auth_token
+Token:
+1. Token has expired -> The expiry date/time has passed
+2. Token is invalid -> This token was not something made by the application
+3. Token logged out -> Token is put in trash
+
+
+encode_auth_token:
+- Takes user ID and creates a new token
+- you can also pass remember parameter -> There is no expiry in the token
+
+
+decode_auth_token:
+- Takes a token and says whether the token is correct.
+- correct: Not be invalid and not be expired
+- Checks if the token has been put in trash or not
+- If token is correct, it extracts the user_id from the token and returns user_id
+
+Unicode and utf-8:
+Computer - 0 or 1
+Characters? -> bytes
+ASCII -> 255 Characters (english Characters, numbers, punctuation marks)
+Unicode -> 1,114,112 Characters (Emojis, Characters, numbers, greek ....)
+HTTP Uses Unicode. Web applications we can see different languages
+utf-8 -> short form for unicode 8 
