@@ -1,0 +1,12 @@
+GET/DELETE - Cannot pass information
+PUT/POST/PATCH - Is used to add. Modify/Create PUT to Modify and POST to Create or other way.
+
+[x] - /subscribers/list - POST : {page_number, limit, *cours_id} -> List of subscribers/users with info about each user
+[x] - /subscribers/create - PUT : {information about the user} -> Create a new user/subscriber
+[ ] - /subscriber/update/[sub_id] - PATCH : {new informationa about the user} -> Modify to an existing user
+[ ] - /subscriber/delete/[sub_id] - DELETE : - -> Delete an existing user
+[ ] - subscriber/search - POST : {fname: "Chris"} -> Users that are retrieved from search
+
+
+Storage:
+Database - MongoDB
