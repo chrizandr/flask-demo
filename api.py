@@ -49,6 +49,8 @@ def index():
 
 
 @app.route('/register', methods=["GET", "POST"])
+# When we do GET we get the registeration form
+# When we do POST, we pass the registeration information and the server will make a new account
 def register():
     """Register."""
     if request.method == "GET":
