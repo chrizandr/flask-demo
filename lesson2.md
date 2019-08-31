@@ -70,7 +70,7 @@ Format for URL parameters: ?param1=value1&param2=value2
 
 Request
 ```
-GET /order?item=1&item=2 HTTP1.1
+GET /order?item=chicken&item=fish HTTP1.1
 Host: www.waiter.com
 
 
@@ -108,7 +108,7 @@ The kitchen may cancel your order if it is not ready and the waiter will give yo
 
 Request
 ```
-DELETE /order?item=1&item=2 HTTP1.1
+DELETE /order?orderid=1&orderid=2 HTTP1.1
 Host: www.waiter.com
 
 ```
@@ -139,7 +139,7 @@ This information has to be passed in the request body
 
 Request:
 ```
-POST/PUT /pay/ HTTP1.1
+POST/PUT /pay?orderid=1 HTTP1.1
 Host: waiter
 
 {
